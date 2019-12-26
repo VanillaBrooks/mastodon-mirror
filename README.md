@@ -9,10 +9,10 @@ This project aims to help produce more high quality content for mastodon that is
 
 This project is a heavy work in progress. These are some of the overall goals of the project
 
-# [checkbox:unchecked] pictures
-# [checkbox:unchecked] gifs
-# [checkbox:unchecked] post titles
-# [checkbox:unchecked] filtering options (upvotes, rank in /hot, etc)
-# [checkbox:unchecked] async
-# [checkbox:unchecked] auto followbacks
-# [checkbox:unchecked] unfollow people who unfollow
+- [ ] pictures
+- [ ] gifs
+- [ ] post titles
+- [ ] filtering options (upvotes, rank in /hot, etc)
+- [ ] async
+- [ ] auto followbacks
+- [ ] unfollow people who unfollow
