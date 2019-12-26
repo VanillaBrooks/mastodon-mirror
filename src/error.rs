@@ -1,3 +1,5 @@
+use reqwest;
+use serde_json;
 use serde_yaml;
 
 macro_rules! from {
@@ -23,3 +25,17 @@ pub enum Config {
 
 from! {std::io::Error, Config::OpenFile}
 from! {serde_yaml::Error, Config::Serde}
+
+#[derive(Debug)]
+pub enum Reddit {
+    Reqwest(reqwest::Error),
+    Serde(serde_json::Error),
+}
+
+from! {reqwest::Error, Reddit::Reqwest}
+from! {serde_json::Error, Reddit::Serde}
+
+#[derive(Debug)]
+pub enum SyncData {
+    
+}
