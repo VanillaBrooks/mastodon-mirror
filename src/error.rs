@@ -30,12 +30,13 @@ from! {serde_yaml::Error, Config::Serde}
 pub enum Reddit {
     Reqwest(reqwest::Error),
     Serde(serde_json::Error),
+    Gfycat(gfycat::error::ApiError),
+    ParseGfycat,
 }
 
 from! {reqwest::Error, Reddit::Reqwest}
 from! {serde_json::Error, Reddit::Serde}
+from! {gfycat::error::ApiError, Reddit::Gfycat}
 
 #[derive(Debug)]
-pub enum SyncData {
-    
-}
+pub enum SyncData {}

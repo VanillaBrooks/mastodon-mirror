@@ -2,10 +2,11 @@ use serde_derive::{Deserialize, Serialize};
 use serde_yaml;
 
 use elefren;
-use std::time;
 use std::collections::HashSet;
+use std::time;
 
 use super::error;
+use super::reddit;
 
 pub type AllSync = Vec<Sync>;
 pub type AllMirror = Vec<Mirror>;
@@ -24,6 +25,7 @@ pub struct Sync {
     #[serde(default = "def_path")]
     redirect: String,
     token: String,
+    nsfw: bool,
 }
 
 fn def_path() -> String {
@@ -34,9 +36,10 @@ fn def_path() -> String {
 pub struct Mirror {
     pub subreddit_url: String,
     pub token: Token,
-    next_update: time::Duration,
+    next_update: time::Instant,
     previous_ids: HashSet<String>,
-    ids_to_post: Vec<String>,
+    to_post: Vec<reddit::Post>,
+    nsfw: bool,
 }
 impl Mirror {
     fn new(sync: Sync) -> Result<Self, error::Config> {
@@ -50,20 +53,43 @@ impl Mirror {
         };
 
         let token = elefren::Mastodon::from(data);
-
+        let next_update = time::Instant::now()
+            .checked_add(time::Duration::from_secs(sync.update_interval))
+            .expect("time err");
         Ok(Self {
-            next_update: std::time::Duration::from_secs(sync.update_interval),
+            next_update,
             subreddit_url: "https://reddit.com/".to_string() + &sync.subreddit_ext,
             token,
             previous_ids: HashSet::new(),
-            ids_to_post: vec![]
+            to_post: vec![],
+            nsfw: sync.nsfw,
         })
     }
 
-    pub fn find_unposted_ids(&self, input_ids: Vec<String>) -> Vec<String> {
-        input_ids.into_iter()
-            .filter(|x| !self.previous_ids.contains(x) && !self.ids_to_post.contains(&x))
+    // convienence method for filtering out ids that have previously been posted
+    pub fn find_unposted_ids(&self, input_ids: Vec<reddit::Post>) -> Vec<reddit::Post> {
+        input_ids
+            .into_iter()
+            .filter(|x| !self.previous_ids.contains(x.id()) && !self.to_post.contains(&x))
             .collect()
+    }
+
+    // add new posts into the queue for posting later
+    pub fn queue_posts(&mut self, mut new_posts: Vec<reddit::Post>) {
+        self.to_post.append(&mut new_posts);
+    }
+
+    pub fn can_update(&self) -> bool {
+        if self.to_post.len() > 0 {
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn post(&self) -> Result<(), error::Config> {
+        // TODO: update to mastodon
+        unimplemented! {}
     }
 }
 

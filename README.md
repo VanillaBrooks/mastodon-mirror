@@ -9,10 +9,11 @@ This project aims to help produce more high quality content for mastodon that is
 
 This project is a heavy work in progress. These are some of the overall goals of the project
 
-- [ ] pictures
-- [ ] gifs
-- [ ] post titles
+- [ ] mirror subreddit pictures
+- [ ] mirror subreddit gifs
+- [ ] mirror subreddit post titles
 - [ ] filtering options (upvotes, rank in /hot, etc)
 - [ ] async
 - [ ] auto followbacks
 - [ ] unfollow people who unfollow
+- [ ] mirror reddit user
