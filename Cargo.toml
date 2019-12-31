@@ -11,7 +11,7 @@ serde_yaml = "0.8.11"
 elefren = "0.20.1"
 serde_derive = "1.0.104"
 serde = "1.0.104"
-reqwest = "0.10.0-alpha.2"
+reqwest = {version="0.10.0-alpha.2", features=["json"]}
 serde_json = "1.0.44"
 tokio = {version=  "0.2.0-alpha.6", features=["macros"]}
 gfycat = {git = "https://github.com/vanillabrooks/gfycat"}

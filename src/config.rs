@@ -8,10 +8,10 @@ use std::time;
 use super::error;
 use super::reddit;
 
+use super::mastodon;
+
 pub type AllSync = Vec<Sync>;
 pub type AllMirror = Vec<Mirror>;
-
-type Token = elefren::Mastodon;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Sync {
@@ -19,47 +19,30 @@ pub struct Sync {
     subreddit_ext: String,
     #[serde(rename = "frequency")]
     update_interval: u64,
-    client_id: String,
-    client_secret: String,
-    base: String,
-    #[serde(default = "def_path")]
-    redirect: String,
-    token: String,
     nsfw: bool,
-}
-
-fn def_path() -> String {
-    "https://github.com/VanillaBrooks/mastodon-mirror".into()
+    tags: Vec<String>,
+    mastodon: mastodon::Data,
 }
 
 #[derive(Debug)]
 pub struct Mirror {
     pub subreddit_url: String,
-    pub token: Token,
+    pub mastodon_api: mastodon::Api,
     next_update: time::Instant,
     previous_ids: HashSet<String>,
     to_post: Vec<reddit::Post>,
     nsfw: bool,
 }
 impl Mirror {
-    fn new(sync: Sync) -> Result<Self, error::Config> {
-        // TODO: do mastodon auth
-        let data = elefren::Data {
-            base: sync.base.into(),
-            client_id: sync.client_id.into(),
-            client_secret: sync.client_secret.into(),
-            redirect: sync.redirect.into(),
-            token: sync.token.into(),
-        };
-
-        let token = elefren::Mastodon::from(data);
+    pub async fn new(sync: Sync) -> Result<Self, error::Config> {
+        let api = mastodon::Api::new(sync.mastodon).await?;
         let next_update = time::Instant::now()
             .checked_add(time::Duration::from_secs(sync.update_interval))
             .expect("time err");
         Ok(Self {
             next_update,
             subreddit_url: "https://reddit.com/".to_string() + &sync.subreddit_ext,
-            token,
+            mastodon_api: api,
             previous_ids: HashSet::new(),
             to_post: vec![],
             nsfw: sync.nsfw,
@@ -102,21 +85,18 @@ pub fn read_config(path: Option<&str>) -> Result<AllSync, error::Config> {
     Ok(sync_items)
 }
 
-pub fn init_mirrors(config_input: AllSync) -> Result<AllMirror, error::Config> {
-    let mirrors = config_input
-        .into_iter()
-        .map(Mirror::new)
-        .filter(|x| {
-            if let Err(x) = x {
-                println! {"there was an error authenticating a mirror"}
-                dbg! {x};
-                false
-            } else {
-                true
-            }
-        })
-        .map(|x| x.unwrap())
-        .collect();
+pub async fn init_mirrors(config_input: AllSync) -> Result<AllMirror, error::Config> {
+    let mut mirrors = Vec::with_capacity(config_input.len());
+
+    for mir in config_input {
+        let m = Mirror::new(mir).await;
+        if let Ok(data) = m {
+            mirrors.push(data);
+        } else {
+            println! {"there was an error with a client"}
+            dbg! {m};
+        }
+    }
 
     Ok(mirrors)
 }

@@ -21,6 +21,7 @@ pub enum Error {
 pub enum Config {
     OpenFile(std::io::Error),
     Serde(serde_yaml::Error),
+    Mastodon(Mastodon),
 }
 
 from! {std::io::Error, Config::OpenFile}
@@ -37,6 +38,17 @@ pub enum Reddit {
 from! {reqwest::Error, Reddit::Reqwest}
 from! {serde_json::Error, Reddit::Serde}
 from! {gfycat::error::ApiError, Reddit::Gfycat}
+from! {Mastodon, Config::Mastodon}
+
+#[derive(Debug)]
+pub enum Mastodon {
+    Reqwest(reqwest::Error),
+    Serde(serde_json::Error),
+    Blank,
+}
+
+from! {reqwest::Error, Mastodon::Reqwest}
+from! {serde_json::Error, Mastodon::Serde}
 
 #[derive(Debug)]
 pub enum SyncData {}
