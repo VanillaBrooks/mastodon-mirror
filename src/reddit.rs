@@ -233,35 +233,84 @@ fn test_strip_11() {
     assert_eq! {left.unwrap(), right};
 }
 
-/// checks that urls are the same as we predict
-/// this would allow the skipping of the gfycat api. However, some gfycat
-/// urls are zippy.gfycat instead of giant.gfycat so its problematic
-async fn check_extrap(gc: &gfycat::Api) {
+//
+// the following blocks check to ensure the webm extrapolation method is correct (its not)
+//
+#[allow(dead_code)]
+async fn init_gfycat() -> gfycat::Api {
+    let creds = gfycat::LoadCredentials::new(std::path::Path::new("gfycat.json")).unwrap();
+    gfycat::Api::from_credentials(&creds).await.unwrap()
+}
+
+#[tokio::test]
+async fn webm_1() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/babyishsoftleveret-babushka-flowers-waiting-welcome-hello";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_2() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/obviousoldgrayreefshark-jennifer-carpenter-yvonne-strahovski";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_3() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/arcticunhealthylacewing";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_4() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/agitatedplaintiveatlasmoth-aimee-garcia";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_5() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/glitteringdeafeningindianskimmer-happy-new-year-new-years-holiday-hanson";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_6() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/sinfularidfluke/";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_7() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/brilliantessentialdouglasfirbarkbeetle";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
-    let url = "https://gfycat.com/babyishsoftleveret-babushka-flowers-waiting-welcome-hello";
-    let (l, r) = test_webm_extrap(url, gc).await;
-    assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_8() {
+    let gc = init_gfycat().await;
+
     let url = "https://gfycat.com/delayedimmaculatefrigatebird-football2";
-    let (l, r) = test_webm_extrap(url, gc).await;
+    let (l, r) = test_webm_extrap(url, &gc).await;
+    assert_eq! {l,r};
+}
+#[tokio::test]
+async fn webm_9() {
+    let gc = init_gfycat().await;
+
+    let url = "https://gfycat.com/brilliantessentialdouglasfirbarkbeetle";
+    let (l, r) = test_webm_extrap(url, &gc).await;
     assert_eq! {l,r};
 }

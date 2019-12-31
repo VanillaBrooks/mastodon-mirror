@@ -19,4 +19,5 @@ Cargo.lock
 
 
 *.yaml
-*.json
+*.json 
+*.webm
