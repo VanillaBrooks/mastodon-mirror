@@ -44,11 +44,17 @@ from! {Mastodon, Config::Mastodon}
 pub enum Mastodon {
     Reqwest(reqwest::Error),
     Serde(serde_json::Error),
+    SerdeUrl(serde_urlencoded::ser::Error),
+    FantoSession(fantoccini::error::NewSessionError),
+    FantoCmd(fantoccini::error::CmdError),
     Blank,
 }
 
 from! {reqwest::Error, Mastodon::Reqwest}
 from! {serde_json::Error, Mastodon::Serde}
+from! {serde_urlencoded::ser::Error, Mastodon::SerdeUrl}
+from! {fantoccini::error::NewSessionError, Mastodon::FantoSession}
+from! {fantoccini::error::CmdError, Mastodon::FantoCmd}
 
 #[derive(Debug)]
 pub enum SyncData {}

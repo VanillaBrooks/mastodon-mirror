@@ -26,13 +26,14 @@ async fn main() {
 
     let mut mirror = mirror.unwrap();
 
-    // let b_ = download_bytes("https://i.imgur.com/gp8uVKd.jpg").await;
+    let b_ = download_bytes("https://i.redd.it/wagmu5qw4e741.jpg").await;
 
-    // let x = mirror[0].mastodon_api.attach_picture(b_).await;
-    let x = mirror[0].mastodon_api.post_status("test status").await;
-    let x = mirror[0].mastodon_api.verify_creds().await;
+    let x = mirror[0].mastodon_api.attach_picture(b_).await;
+    // let x = mirror[0].mastodon_api.post_status("test status").await;
+    dbg! {x};
 
-    dbg!{x};
+    // let x = mirror[0].mastodon_api.verify_creds().await;
+    // dbg! {x};
 
     // let client = reqwest::Client::new();
     // let res = mastodon_mirror::sync_data::cycle_reddit(&mut mirror, &client);

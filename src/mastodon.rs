@@ -2,8 +2,11 @@ use reqwest;
 use serde;
 use serde::{Deserialize, Serialize};
 use std::time::Instant;
+use fantoccini::{self, Locator};
+use serde_urlencoded;
 
 use bytes;
+use reqwest::multipart::Form;
 
 use super::error;
 #[derive(Debug, Deserialize)]
@@ -34,57 +37,43 @@ impl Api {
 
         let endpoint = data.base.to_owned() + "/oauth/authorize";
 
-        // let json = serde_json::json! {{
-        //     "response_type": "code",
-        //     "client_id": data.client_id.clone(),
-        //     "redirect_uri": data.redirect_uri.clone(),
-        //     "scope": data.scope.clone()
-        // }};
+        // let url = data.authorize().url(endpoint)?;
 
-        // let form = reqwest::multipart::Form::new()
-        //     .text("response_type", "code")
-        //     .text("client_id", data.client_id.clone())
-        //     .text("redirect_url", data.redirect_uri.clone())
-        //     .text("scope", data.scope.clone());
+        // dbg!{&url};
 
-        // let form = reqwest::multipart::Form::new()
-        //     .text("Username", "_")
-        //     .text("Password", "_");
+        // let mut fant = fantoccini::Client::new("http://localhost:4444").await?;
+        // fant.goto(&url).await?;
 
-        // let mut user_auth = dbg!{client
-        //     .get(&endpoint)
-        //     .query(&[
-        //         ("response_type", "code"),
-        //         ("client_id", &data.client_id),
-        //         ("redirect_uri", "urn:ietf:wg:oauth:2.0:oob"),
-        //         ("scope", &data.scope),
-        //     ])}
-        //     .multipart(form)
+        // let mut login_form = fant.form(Locator::Id("new_user")).await?;
+        // login_form.set(Locator::Id("user_email") , &data.username).await;
+        // login_form.set(Locator::Id("user_password") , &data.password).await;
+        // login_form.submit().await;
+        
+        // login_form.set(Locator::Css("btn")).await;
+
+        // let oauth_form = fant.form(Locator::Css("oauth-code")).await?;
+        // let oauth_code = oauth_form.
+        
+        // let form = fantoccini::Form.
+
+
+        // let endpoint = data.base.to_owned() + "/oauth/token";
+
+        // let mut response = client
+        //     .post(&endpoint)
+        //     .json(&data)
         //     .send()
+        //     .await?
+        //     .json::<AuthResponse>()
         //     .await?;
-
-        // dbg! {&user_auth};
-        // dbg!{user_auth.url().query()};
-        // dbg!{user_auth.text().await};
-
-        // dbg!{user_auth.text().await};
-
-        let endpoint = data.base.to_owned() + "/oauth/token";
-
-        let mut response = client
-            .post(&endpoint)
-            .json(&data)
-            .send()
-            .await?
-            .json::<AuthResponse>()
-            .await?;
 
         // TODO: convert response.created_at to Instant to store here
 
         Ok(Self {
             client,
             expiration: Instant::now(),
-            token: response.access_token,
+            // token: response.access_token,
+            token: data.code.clone(),
             auth_data: data,
             created_at: Instant::now(),
         })
@@ -102,18 +91,21 @@ impl Api {
         dbg! {&self.token};
         let token = "Bearer ".to_owned() + &self.token;
 
-        let mut response = dbg! {self
-        .client
-        .post(&endpoint)
-        .bearer_auth(&self.token)
-        // .header("Authorization", &token)
-        .multipart(file)}
-        .send()
-        .await?;
-        dbg! {&response};
+        let mut response = self
+            .client
+            .post(&endpoint)
+            .bearer_auth(&self.token)
+            .multipart(file)
+            .send()
+            .await?;
 
-        dbg! {response.text().await};
+        dbg!{response.status()};
 
+        dbg! {&response.text().await};
+
+        // let response_json = response.json::<Attachment>().await?;
+
+        // Ok(response_json)
         Ok(Attachment::default())
     }
 
@@ -124,22 +116,18 @@ impl Api {
     ) -> Result<(), error::Mastodon> {
         let endpoint = self.auth_data.base.to_owned() + "/api/v1/statuses";
 
-        let form = reqwest::multipart::Form::new().text("status", text.to_owned());
-
-        let form = serde_json::json! {{"status": text.to_owned()}};
+        let form = serde_json::json! {{"status": text}};
 
         let mut response = self
             .client
             .post(&endpoint)
             .bearer_auth(&self.token)
-            // .header("Authorization", format!{"Bearer {}", &self.token})
-            // .multipart(form)}
             .json(&form)
             .send()
             .await?;
 
         dbg! {&response};
-        dbg! {response.text().await};
+        // dbg! {response.text().await};
 
         Ok(())
     }
@@ -147,19 +135,52 @@ impl Api {
     pub async fn verify_creds(&self) -> Result<(), error::Mastodon> {
         let endpoint = self.auth_data.base.to_owned() + "/api/v1/accounts/verify_credentials";
 
-        let response = self
+        let mut response = self
             .client
             .get(&endpoint)
             .bearer_auth(&self.token)
             .send()
-            .await?
-            .text()
-            .await;
+            .await?;
+            // .json::<AppCredentials>()
+            // .await?;
+        dbg!{&response.text().await};
 
-        dbg! {response};
+        // dbg! {response};
 
         Ok(())
     }
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct AppCredentials {
+    id: String,
+    username: String,
+    acct: String,
+    display_name: String,
+    locked: bool,
+    bot: bool,
+    created_at: String,
+    note: String,
+    url: String,
+    avatar: String,
+    header: String,
+    header_static: String,
+    followers_count: u32,
+    following_count: u32,
+    statuses_count: u32,
+    last_status_at: Option<String>,
+    source: Source,
+    fields: Vec<String>,
+    emojis: Vec<String>,
+}
+#[derive(Debug, Deserialize, Default)]
+struct Source {
+    privacy: String,
+    sensitive: bool,
+    langugae: Option<String>,
+    note: String,
+    fields: Vec<String>,
+    follow_requests_count: u32,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -177,7 +198,7 @@ pub struct Attachment {
 
 #[derive(Debug, Deserialize, Default)]
 struct PictureInfo {
-    Focus: Point,
+    focus: Point,
     original: PictureDimensions,
     small: PictureDimensions,
 }
@@ -204,9 +225,41 @@ pub struct Data {
     scope: String,
     #[serde(default = "init_grant_type")]
     grant_type: String,
-    base: String,
     #[serde(skip_serializing)]
-    code: String
+    base: String,
+    #[serde(default)]
+    code: String,
+    #[serde(skip_serializing)]
+    username: String,
+    #[serde(skip_serializing)]
+    password: String,
+}
+
+impl Data{
+    fn authorize(&self) -> AuthRequest {
+        AuthRequest {
+            client_id: &self.client_id,
+            redirect_uri: &self.redirect_uri,
+            scope: &self.scope,
+            response_type: "code"
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct AuthRequest <'a> {
+    client_id: &'a str,
+    redirect_uri: &'a str,
+    scope: &'a str,
+    response_type: &'a str
+}
+impl <'a> AuthRequest <'a>{
+    fn url (self, mut base: String) -> Result<String, error::Mastodon> {
+        let url = serde_urlencoded::to_string(self)?;
+        Ok(base + "?" + &url)
+
+
+    }
 }
 
 fn init_grant_type() -> String {
