@@ -34,39 +34,6 @@ pub struct Api {
 impl Api {
     pub async fn new(data: Data) -> Result<Self, error::Mastodon> {
         let client = reqwest::Client::new();
-
-        let endpoint = data.base.to_owned() + "/oauth/authorize";
-
-        // let url = data.authorize().url(endpoint)?;
-
-        // dbg!{&url};
-
-        // let mut fant = fantoccini::Client::new("http://localhost:4444").await?;
-        // fant.goto(&url).await?;
-
-        // let mut login_form = fant.form(Locator::Id("new_user")).await?;
-        // login_form.set(Locator::Id("user_email") , &data.username).await;
-        // login_form.set(Locator::Id("user_password") , &data.password).await;
-        // login_form.submit().await;
-        
-        // login_form.set(Locator::Css("btn")).await;
-
-        // let oauth_form = fant.form(Locator::Css("oauth-code")).await?;
-        // let oauth_code = oauth_form.
-        
-        // let form = fantoccini::Form.
-
-
-        // let endpoint = data.base.to_owned() + "/oauth/token";
-
-        // let mut response = client
-        //     .post(&endpoint)
-        //     .json(&data)
-        //     .send()
-        //     .await?
-        //     .json::<AuthResponse>()
-        //     .await?;
-
         // TODO: convert response.created_at to Instant to store here
 
         Ok(Self {
@@ -79,6 +46,7 @@ impl Api {
         })
     }
 
+    // TODO: Check for internal server error here later
     pub async fn attach_picture(&self, data: bytes::Bytes) -> Result<Attachment, error::Mastodon> {
         let endpoint = self.auth_data.base.to_owned() + "/api/v1/media";
 
@@ -89,7 +57,6 @@ impl Api {
         let file = reqwest::multipart::Form::new().part("file", file_part);
 
         dbg! {&self.token};
-        let token = "Bearer ".to_owned() + &self.token;
 
         let mut response = self
             .client
