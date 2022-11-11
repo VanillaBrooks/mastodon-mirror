@@ -1,7 +1,6 @@
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use serde_yaml;
 
-use elefren;
 use std::collections::HashSet;
 use std::time;
 
@@ -39,9 +38,11 @@ impl Mirror {
         let next_update = time::Instant::now()
             .checked_add(time::Duration::from_secs(sync.update_interval))
             .expect("time err");
+        let subreddit_url = format!("https://reddit.com/{}", sync.subreddit_ext);
+
         Ok(Self {
             next_update,
-            subreddit_url: "https://reddit.com/".to_string() + &sync.subreddit_ext,
+            subreddit_url,
             mastodon_api: api,
             previous_ids: HashSet::new(),
             to_post: vec![],

@@ -5,6 +5,8 @@ use std::time::Instant;
 use fantoccini::{self, Locator};
 use serde_urlencoded;
 
+use std::fmt::Write as _;
+
 use bytes;
 use reqwest::multipart::Form;
 
@@ -223,8 +225,8 @@ struct AuthRequest <'a> {
 impl <'a> AuthRequest <'a>{
     fn url (self, mut base: String) -> Result<String, error::Mastodon> {
         let url = serde_urlencoded::to_string(self)?;
-        Ok(base + "?" + &url)
-
+        std::write!(base, "{}", url).unwrap();
+        Ok(base)
 
     }
 }

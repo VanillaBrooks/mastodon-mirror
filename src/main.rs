@@ -17,7 +17,8 @@ async fn download_url(save_name: &str, url: &str) -> Result<(), reqwest::Error> 
 async fn download_bytes(url: &str) -> bytes::Bytes {
     reqwest::get(url).await.unwrap().bytes().await.unwrap()
 }
-#[tokio::main]
+
+#[tokio::main(flavor="current_thread")]
 async fn main() {
     let res = config::read_config(None);
     dbg! {&res};
